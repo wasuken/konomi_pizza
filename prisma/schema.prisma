@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int     @id @default(autoincrement())
+  email     String  @unique
+  password  String 
+  address   String?
+  cart      CartHistory[]
+  orders    Order[]
+}
+
+model Cart {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  productId  Int
+  quantity   Int
+  user       User     @relation(fields: [userId], references: [id])
+  product    Product  @relation(fields: [productId], references: [id])
+}
+
+model CartHistory {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  productId  Int
+  quantity   Int
+}
+
+model Order {
+  id                Int           @id @default(autoincrement())
+  userId            Int
+  orderDate         DateTime
+  deliveryOption    String
+  deliveryAddress   String
+  pickupStore       String?
+  paymentMethod     String
+  user              User          @relation(fields: [userId], references: [id])
+  orderItems        OrderItem[]
+}
+
+model OrderItem {
+  id         Int      @id @default(autoincrement())
+  orderId    Int
+  productId  Int
+  quantity   Int
+  order      Order    @relation(fields: [orderId], references: [id])
+  product    Product  @relation(fields: [productId], references: [id])
+}
+
+model Category {
+  id       Int      @id @default(autoincrement())
+  name     String
+  products Product[]
+}
+
+model Product {
+  id          Int         @id @default(autoincrement())
+  categoryId  Int
+  name        String
+  price       Decimal
+  category    Category    @relation(fields: [categoryId], references: [id])
+}
+
+model Coupon {
+  id       Int      @id @default(autoincrement())
+  code     String
+  discount Decimal
+}
+
