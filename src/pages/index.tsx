@@ -13,8 +13,28 @@ export default function Home() {
   const [address, setAddresss] = useState<string>("");
   const [username, setUsername] = useState<string>("");
   const [pizzaList, setPizzaList] = useState<Pizza[]>([]);
+  const [orderList, setOrderList] = useState<Pizza[]>([]);
+  const [selectedReceive, setSelectedReceive] = useState<string>();
+  const [selectedPizzaId, setSelectedPizzaId] = useState<string>();
   const handleClick = () => {
-    alert("多分注文できたよ");
+    alert(`
+住所: ${address}
+お名前: ${username}
+注文内容: ${orderList.map((x) => x.name).join(",")}
+金額: ${orderList.map((x) => x.amount).reduce((acm, x) => acm + x, 0)}
+`);
+  };
+  const handleSelectPizzaId = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const id = e.target.value;
+    const pizza = pizzaList.find((pi) => pi.id === id);
+    if (pizza) {
+      setOrderList([...orderList, pizza]);
+    }
+    setSelectedPizzaId("");
+  };
+  const handleSelectReceive = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const id = e.target.value;
+    setSelectedReceive(id);
   };
   useEffect(() => {
     setPizzaList([
@@ -44,29 +64,84 @@ export default function Home() {
       </Head>
       <div>
         <div>
-          住所: <input type="text" value={address} />
+          <h3>### 画面1 ###</h3>
+          <p>
+            ここで住所を選択させて、周辺の店が存在するか確認する。
+            また、距離を算出する
+          </p>
+          住所:{" "}
+          <input
+            type="text"
+            value={address}
+            onInput={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setAddresss(e.target.value)
+            }
+          />
         </div>
+        <hr />
         <div>
-          お名前: <input type="text" value={username} />
-        </div>
-        <div>
+          <h3>### 画面2 ###</h3>
+          <p>受け取り方法の選択と想定まち時間を表示する</p>
           受取方法:{" "}
-          <select>
+          <select
+            defaultValue=""
+            value={selectedReceive}
+            onChange={handleSelectReceive}
+          >
+            <option value=""></option>
             <option value="0">配達</option>
             <option value="1">お持ち帰り</option>
           </select>
         </div>
+        <hr />
         <div>
+          <h3>### 画面3 ###</h3>
+          <p>
+            注文画面。 商品の選択、クーポンの利用、カートを表示できるようにする
+            それぞれフッタータブで切り替えられるように
+          </p>
           ピザ:
-          <select>
+          <select
+            onChange={handleSelectPizzaId}
+            defaultValue=""
+            value={selectedPizzaId}
+          >
+            <option value=""></option>
             {pizzaList.map((pi) => (
               <option key={pi.id} value={pi.id}>
                 {pi.name}
               </option>
             ))}
           </select>
+          <div>
+            選んだピザ:
+            <ul>
+              {orderList.map((pi) => (
+                <li key={pi.id}>
+                  {pi.name}({pi.amount}yen)
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
+        <hr />
         <div>
+          <h3>### 画面4 ###</h3>
+          <p>注文情報を入力する 名前、住所(地先から)、支払い方法</p>
+          お名前:{" "}
+          <input
+            type="text"
+            value={username}
+            onInput={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setUsername(e.target.value)
+            }
+          />
+        </div>
+        <hr />
+        <div>
+          <h3>### 画面5 ###</h3>
+          <p>可能なら注文状況とかも見れるといいかも</p>
+
           <button type="button" onClick={handleClick}>
             注文する
           </button>
